@@ -27,29 +27,43 @@ def spela_ny_omgång():
 
 def visa_highscore():
     try:
-        with open("highscore.json", "r", encoding="utf-8") as fil:
-            highscore = json.load(fil)
-            print(f"Highscore: {highscore['namn']} med {highscore['försök']} försök.")
+        with open("highscore.json", "r", encoding="UTF-8") as fil:
+            highscores = json.load(fil)
 
-    except (FileNotFoundError, ValueError):
+            if not highscores:
+                print("Ingen highscore tillgänglig.")
+                return
+
+            bästa = highscores[0]
+            print(f"Highscore: {bästa['namn']} med {bästa['försök']} försök.")
+
+    except (FileNotFoundError, ValueError, IndexError):
         print("Ingen highscore tillgänglig.")
+
 
 def spara_highscore(försök):
     spelaresnamn = input("Ange ditt namn: ")
-    highscore = {"namn": spelaresnamn, "försök": försök}
+    ny_score = {"namn": spelaresnamn, "försök": str(försök)}
+
     try:
-        with open("highscore.json", "r", encoding="utf-8") as fil:
-            befintlig_highscore = json.load(fil)
-            if försök < befintlig_highscore["försök"]:
-                with open("highscore.json", "w", encoding="utf-8") as fil:
-                    json.dump(highscore, fil)
-                    print("Ny highscore sparad!")
-            else:
-                print("Du slog inte highscoren.")
+        with open("highscore.json", "r", encoding="UTF-8") as fil:
+            highscores = json.load(fil)
+
+            if not isinstance(highscores, list):
+                highscores = []
+
     except (FileNotFoundError, ValueError):
-        with open("highscore.json", "w", encoding="utf-8") as fil:
-            json.dump(highscore, fil)
-            print("Highscore sparad!")
+        highscores = []
+
+    highscores.append(ny_score)
+
+    # sortera efter antal försök (lägst först)
+    highscores.sort(key=lambda x: int(x["försök"]))
+
+    with open("highscore.json", "w", encoding="UTF-8") as fil:
+        json.dump(highscores, fil)
+
+    print("Score sparad!")
 
 
 while True:
